@@ -1,0 +1,34 @@
+###########################################################################
+# AUTO-GENERATED FILE - DO NOT EDIT MANUALLY
+#
+# This AppProject defines permissions for the home-test cluster.
+# It is referenced by the cluster-specific Applications and used
+# as the project for all workloads deployed to this cluster.
+#
+# Purpose: Define AppProject for home-test cluster
+#
+# Deletion Protection: This AppProject has deletion protection enabled.
+#   ArgoCD will refuse to delete it even if removal is requested,
+#   preventing accidental deletion of cluster access configuration.
+###########################################################################
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: home-test-workloads
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-options: Delete=false
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  description: AppProject for home-test workloads
+  sourceRepos:
+    - "*"
+  destinations:
+    - namespace: "*"
+      server: "*"
+  clusterResourceWhitelist:
+    - group: "*"
+      kind: "*"
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"

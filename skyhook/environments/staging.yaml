@@ -1,0 +1,6 @@
+name: staging
+namespace: staging
+cluster_name: home-test
+cloud_provider: gcp
+account: test-project-123
+location: test
