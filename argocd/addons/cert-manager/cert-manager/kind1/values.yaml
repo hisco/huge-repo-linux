@@ -1,0 +1,7 @@
+cert-manager:
+  fullnameOverride: cert-manager
+  installCRDs: false
+  nameOverride: cert-manager
+charts:
+  cert-manager:
+    enabled: true
