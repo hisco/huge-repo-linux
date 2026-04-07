@@ -1,0 +1,44 @@
+###########################################################################
+# AUTO-GENERATED FILE - DO NOT EDIT MANUALLY
+# 
+# This ApplicationSet deploys the envoy-gateway-class Kustomize component to the home-test cluster.
+# It uses a git file generator to read cluster configuration and deploy
+# using Kustomize overlays with cluster-specific patches.
+###########################################################################
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: envoy-gateway-class-home-test
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  goTemplate: true
+  goTemplateOptions:
+    - missingkey=error
+  generators:
+    - git:
+        repoURL: https://github.com/hisco/huge-repo-linux
+        revision: HEAD
+        files:
+          - path: argocd/cluster-config/home-test/config.yaml
+  template:
+    metadata:
+      name: envoy-gateway-class-{{ .cluster.name }}
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: "{{ .addons.argocdProject }}"
+      source:
+        repoURL: https://github.com/hisco/huge-repo-linux
+        targetRevision: "{{ .addons.targetRevision }}"
+        path: argocd/addons/envoy-gateway/envoy-gateway-class/overlays/{{ .addons.overlay }}
+      destination:
+        server: "{{ .cluster.address }}"
+        namespace: envoy-gateway-system
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
