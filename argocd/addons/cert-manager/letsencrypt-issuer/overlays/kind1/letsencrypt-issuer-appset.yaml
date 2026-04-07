@@ -1,0 +1,44 @@
+###########################################################################
+# AUTO-GENERATED FILE - DO NOT EDIT MANUALLY
+# 
+# This ApplicationSet deploys the letsencrypt-issuer Kustomize component to the kind1 cluster.
+# It uses a git file generator to read cluster configuration and deploy
+# using Kustomize overlays with cluster-specific patches.
+###########################################################################
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: letsencrypt-issuer-kind1
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  goTemplate: true
+  goTemplateOptions:
+    - missingkey=error
+  generators:
+    - git:
+        repoURL: https://github.com/hisco/huge-repo-linux
+        revision: HEAD
+        files:
+          - path: argocd/cluster-config/kind1/config.yaml
+  template:
+    metadata:
+      name: letsencrypt-issuer-{{ .cluster.name }}
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: "{{ .addons.argocdProject }}"
+      source:
+        repoURL: https://github.com/hisco/huge-repo-linux
+        targetRevision: "{{ .addons.targetRevision }}"
+        path: argocd/addons/cert-manager/letsencrypt-issuer/overlays/{{ .addons.overlay }}
+      destination:
+        server: "{{ .cluster.address }}"
+        namespace: cert-manager
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true

@@ -1,0 +1,49 @@
+###########################################################################
+# AUTO-GENERATED FILE - DO NOT EDIT MANUALLY
+# 
+# This ApplicationSet deploys the cert-manager Helm component to the kind1 cluster.
+# It uses a git file generator to read cluster configuration and deploy
+# the Helm chart with cluster-specific values.
+###########################################################################
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: cert-manager-kind1
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  goTemplate: true
+  goTemplateOptions:
+    - missingkey=error
+  generators:
+    - git:
+        repoURL: https://github.com/hisco/huge-repo-linux
+        revision: HEAD
+        files:
+          - path: argocd/cluster-config/kind1/config.yaml
+  template:
+    metadata:
+      name: cert-manager-{{ .cluster.name }}
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: "{{ .addons.argocdProject }}"
+      source:
+        repoURL: https://github.com/hisco/huge-repo-linux
+        targetRevision: "{{ .addons.targetRevision }}"
+        path: argocd/addons/cert-manager/cert-manager/{{ .addons.overlay }}
+        helm:
+          releaseName: cert-manager
+          valueFiles:
+            - ../values.yaml
+            - values.yaml
+      destination:
+        server: "{{ .cluster.address }}"
+        namespace: cert-manager
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true

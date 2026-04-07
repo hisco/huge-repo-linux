@@ -1,0 +1,94 @@
+###########################################################################
+# WORKLOADS APPLICATIONSET - PROD
+#
+# This ApplicationSet deploys workload applications to the prod environment.
+#
+# How it works:
+#   - Discovers: **/deploy/argocd/*.yaml (filtered by label skyhook.io/environment: prod)
+#   - Combines data from 3 sources using nested matrix generators:
+#     1. Workload deployment configs (filtered by environment label)
+#     2. Environment config: skyhook/environments/prod.yaml (provides namespace)
+#     3. Cluster config: argocd/cluster-config/kind1/config.yaml (provides server, project)
+#
+# Dynamic Path Derivation:
+#   - Path: {{ .path.path | dir }}/overlays/prod
+#   - Example: deploy-repo/backend-api/deploy/argocd/prod.yaml
+#              → deploy-repo/backend-api/deploy/overlays/prod
+#
+# Template Patch Support:
+#   - Workload files can override: annotations, labels, syncPolicy
+#   - Allows per-application customization while maintaining common defaults
+#
+# Sync Policy:
+#   - Automated sync with prune and self-heal
+#   - CreateNamespace enabled
+#   - Resources preserved on ApplicationSet deletion
+###########################################################################
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: platform-apps-prod
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-options: Delete=false
+spec:
+  goTemplate: true
+  goTemplateOptions:
+    - missingkey=zero
+  syncPolicy:
+    preserveResourcesOnDeletion: true
+  generators:
+    - matrix:
+        generators:
+          - matrix:
+              generators:
+                - git:
+                    repoURL: https://github.com/hisco/huge-repo-linux
+                    revision: HEAD
+                    files:
+                      - path: "**/deploy/argocd/*.yaml"
+                  selector:
+                    matchLabels:
+                      metadata.labels.skyhook.io/environment: prod
+                - git:
+                    repoURL: https://github.com/hisco/huge-repo-linux
+                    revision: HEAD
+                    files:
+                      - path: skyhook/environments/prod.yaml
+          - git:
+              repoURL: https://github.com/hisco/huge-repo-linux
+              revision: HEAD
+              files:
+                - path: argocd/cluster-config/kind1/config.yaml
+  template:
+    metadata:
+      name: "{{ .metadata.name }}-{{ .name }}"
+    spec:
+      project: "{{ .workloads.argocdProject }}"
+      source:
+        repoURL: https://github.com/hisco/huge-repo-linux
+        targetRevision: '{{ dig "spec" "source" "targetRevision" "HEAD" . }}'
+        path: "{{ .path.path | dir }}/overlays/prod"
+      destination:
+        server: "{{ .cluster.address }}"
+        namespace: "{{ .namespace }}"
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+  templatePatch: |
+    metadata:
+          {{- if .metadata.annotations }}
+          annotations:
+            {{- range $key, $value := .metadata.annotations }}
+            {{ $key }}: {{ $value | quote }}
+            {{- end }}
+          {{- end }}
+          {{- if .metadata.labels }}
+          labels:
+            {{- range $key, $value := .metadata.labels }}
+            {{ $key }}: {{ $value | quote }}
+            {{- end }}
+          {{- end }}
