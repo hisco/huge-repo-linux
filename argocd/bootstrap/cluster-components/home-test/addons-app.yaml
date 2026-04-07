@@ -1,0 +1,41 @@
+###########################################################################
+# AUTO-GENERATED FILE - DO NOT EDIT MANUALLY
+#
+# This Application discovers and deploys addons components for home-test cluster.
+#
+# How it works:
+#   - Searches for: argocd/addons/**/home-test/*-appset.yaml
+#   - Deploys discovered ApplicationSets to ArgoCD
+#   - Those ApplicationSets then deploy actual resources to target clusters
+#
+# This enables automatic discovery of addons components organized by cluster.
+#
+# Sync Policy:
+#   - Fully automated sync with prune and self-heal.
+#     ArgoCD auto-applies changes, removes deleted resources, and reverts
+#     manual cluster changes back to Git state.
+###########################################################################
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: home-test-addons
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-options: Delete=false
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  project: home-test-addons
+  source:
+    repoURL: https://github.com/hisco/huge-repo-linux
+    targetRevision: HEAD
+    path: argocd/addons
+    directory:
+      recurse: true
+      include: "**/*/home-test/*-appset.yaml"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
