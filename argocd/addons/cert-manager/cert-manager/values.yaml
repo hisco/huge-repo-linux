@@ -1,0 +1,10 @@
+charts:
+  cert-manager:
+    enabled: # enabled: can change whether the chart will be deployed or not
+cert-manager:
+  fullnameOverride: cert-manager # Consistent lowercase naming across clusters
+  installCRDs: false # CRDs managed by Kustomize component - keep false
+  replicaCount: 1 # Base replica count (can be overridden per cluster)
+  config:
+    # Enable for Gateway API support for automatic certificate provisioning
+    enableGatewayAPI: true
