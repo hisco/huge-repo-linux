@@ -1,0 +1,5 @@
+charts:
+  sealed-secrets:
+    enabled: # enabled: can change whether the chart will be deployed or not
+sealed-secrets:
+  fullnameOverride: sealed-secrets-controller
