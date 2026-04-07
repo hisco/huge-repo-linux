@@ -1,0 +1,6 @@
+name: prod
+namespace: prod
+cluster_name: kind1
+cloud_provider: gcp
+account: test-project-123
+location: test

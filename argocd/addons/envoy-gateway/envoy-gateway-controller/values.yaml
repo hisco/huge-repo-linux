@@ -1,0 +1,13 @@
+charts:
+  gateway-helm:
+    enabled: # enabled: can change whether the chart will be deployed or not
+gateway-helm:
+  deployment:
+    envoyGateway:
+      resources:
+        limits:
+          cpu: 500m
+          memory: 1024Mi
+        requests:
+          cpu: 100m
+          memory: 256Mi

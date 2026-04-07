@@ -1,0 +1,10 @@
+apiVersion: v2
+name: cert-manager
+description: Cert-manager controller and webhook for automatic TLS certificate management
+type: application
+version: 1.0.0
+dependencies:
+  - name: cert-manager
+    version: 1.17.0
+    repository: https://charts.jetstack.io
+    condition: charts.cert-manager.enabled
